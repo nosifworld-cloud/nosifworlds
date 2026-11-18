@@ -1,0 +1,6 @@
+{
+  "name": "NOSIF WORLDS",
+  "description": "Luxury fashion and flagship electronics single-vendor e-commerce atelier with AYAN AI concierge, Bangladesh Taka (BDT) checkout, and secure administration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

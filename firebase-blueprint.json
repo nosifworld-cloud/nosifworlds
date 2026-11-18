@@ -1,0 +1,274 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Single-vendor luxury fashion or flagship electronics product sold exclusively by NOSIF WORLDS.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "sku": { "type": "string", "maxLength": 48 },
+        "name": { "type": "string", "minLength": 2, "maxLength": 140 },
+        "division": { "type": "string", "enum": ["fashion", "electronics"] },
+        "category": { "type": "string", "minLength": 2, "maxLength": 64 },
+        "priceBdt": { "type": "number" },
+        "compareAtBdt": { "type": "number" },
+        "description": { "type": "string", "minLength": 10, "maxLength": 3000 },
+        "imageUrl": { "type": "string", "minLength": 5, "maxLength": 1000 },
+        "sizes": { "type": "array" },
+        "colors": { "type": "array" },
+        "specs": { "type": "array" },
+        "stock": { "type": "integer" },
+        "featured": { "type": "boolean" },
+        "isNewArrival": { "type": "boolean" },
+        "isBestSeller": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "id",
+        "sku",
+        "name",
+        "division",
+        "category",
+        "priceBdt",
+        "description",
+        "imageUrl",
+        "sizes",
+        "colors",
+        "stock",
+        "featured",
+        "isNewArrival",
+        "isBestSeller",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Private customer profile and shipping preferences isolated per user.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "email": { "type": "string", "format": "email", "maxLength": 200 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "city": { "type": "string", "maxLength": 80 },
+        "address": { "type": "string", "maxLength": 320 },
+        "postalCode": { "type": "string", "maxLength": 24 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "email", "createdAt", "updatedAt"]
+    },
+    "WishlistItem": {
+      "title": "WishlistItem",
+      "description": "Customer saved product reference inside private wishlist subcollection.",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "addedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["productId", "userId", "addedAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer purchase order in BDT with explicit Bangladesh payment gateway readiness.",
+      "type": "object",
+      "properties": {
+        "orderNumber": { "type": "string", "maxLength": 48 },
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "customerName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "customerEmail": { "type": "string", "format": "email", "maxLength": 200 },
+        "customerPhone": { "type": "string", "minLength": 6, "maxLength": 32 },
+        "shippingAddress": { "type": "string", "minLength": 5, "maxLength": 320 },
+        "city": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "postalCode": { "type": "string", "maxLength": 24 },
+        "items": { "type": "array" },
+        "subtotalBdt": { "type": "number" },
+        "shippingBdt": { "type": "number" },
+        "totalBdt": { "type": "number" },
+        "paymentMethod": { "type": "string", "enum": ["bKash", "Nagad", "SSLCommerz", "COD"] },
+        "paymentStatus": { "type": "string", "enum": ["pending_gateway", "cod_pending", "verified", "failed"] },
+        "fulfillmentStatus": { "type": "string", "enum": ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "orderNumber",
+        "userId",
+        "customerName",
+        "customerEmail",
+        "customerPhone",
+        "shippingAddress",
+        "city",
+        "items",
+        "subtotalBdt",
+        "shippingBdt",
+        "totalBdt",
+        "paymentMethod",
+        "paymentStatus",
+        "fulfillmentStatus",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Verified customer review for NOSIF WORLDS products.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "authorName": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "productId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "productName": { "type": "string", "maxLength": 140 },
+        "rating": { "type": "integer" },
+        "title": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "comment": { "type": "string", "minLength": 5, "maxLength": 1500 },
+        "status": { "type": "string", "enum": ["approved", "pending", "hidden"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId",
+        "authorName",
+        "productId",
+        "productName",
+        "rating",
+        "title",
+        "comment",
+        "status",
+        "createdAt"
+      ]
+    },
+    "Article": {
+      "title": "Article",
+      "description": "Editorial journal entry for luxury fashion and flagship hardware.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 4, "maxLength": 160 },
+        "category": { "type": "string", "maxLength": 64 },
+        "excerpt": { "type": "string", "maxLength": 400 },
+        "body": { "type": "string", "maxLength": 6000 },
+        "imageUrl": { "type": "string", "maxLength": 1000 },
+        "readTime": { "type": "string", "maxLength": 32 },
+        "publishedAt": { "type": "string", "maxLength": 48 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "category", "excerpt", "body", "imageUrl", "readTime", "publishedAt", "updatedAt"]
+    },
+    "SiteContent": {
+      "title": "SiteContent",
+      "description": "Editable storefront hero, special offer banner, and contact placeholders managed by Admin.",
+      "type": "object",
+      "properties": {
+        "heroEyebrow": { "type": "string", "maxLength": 80 },
+        "heroTitle": { "type": "string", "maxLength": 160 },
+        "heroSubtitle": { "type": "string", "maxLength": 400 },
+        "offerBanner": { "type": "string", "maxLength": 200 },
+        "supportEmail": { "type": "string", "maxLength": 160 },
+        "whatsappNumber": { "type": "string", "maxLength": 40 },
+        "showroomAddress": { "type": "string", "maxLength": 240 },
+        "instagramUrl": { "type": "string", "maxLength": 240 },
+        "facebookUrl": { "type": "string", "maxLength": 240 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "heroEyebrow",
+        "heroTitle",
+        "heroSubtitle",
+        "offerBanner",
+        "supportEmail",
+        "whatsappNumber",
+        "showroomAddress",
+        "instagramUrl",
+        "facebookUrl",
+        "updatedAt"
+      ]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Customer support message submitted through Contact Us.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "email": { "type": "string", "format": "email", "maxLength": 200 },
+        "subject": { "type": "string", "minLength": 2, "maxLength": 160 },
+        "message": { "type": "string", "minLength": 5, "maxLength": 2000 },
+        "status": { "type": "string", "enum": ["open", "resolved"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "email", "subject", "message", "status", "createdAt"]
+    },
+    "AiConversation": {
+      "title": "AiConversation",
+      "description": "Logged AYAN AI shopping assistant session for authenticated customers and admin review.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "customerEmail": { "type": "string", "maxLength": 200 },
+        "lastPrompt": { "type": "string", "maxLength": 1000 },
+        "lastReply": { "type": "string", "maxLength": 3000 },
+        "language": { "type": "string", "enum": ["en", "bn", "mixed"] },
+        "messageCount": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "lastPrompt", "lastReply", "language", "messageCount", "createdAt", "updatedAt"]
+    },
+    "AdminGrant": {
+      "title": "AdminGrant",
+      "description": "Authorized administrator registry document keyed by Firebase Auth UID.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "format": "email", "maxLength": 200 },
+        "grantedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "grantedAt"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Public storefront catalog items managed solely by authorized administrators."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private customer profile PII isolated strictly to the owning user and admins."
+    },
+    "/users/{userId}/wishlist/{itemId}": {
+      "schema": { "$ref": "#/entities/WishlistItem" },
+      "description": "Private customer wishlist items nested under the owning user profile."
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Customer BDT orders readable by the owning customer or admin, and updatable only by admins."
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Product reviews readable publicly when approved, creatable by verified customers, moderated by admins."
+    },
+    "/articles/{articleId}": {
+      "schema": { "$ref": "#/entities/Article" },
+      "description": "Editorial journal articles readable publicly and managed by admins."
+    },
+    "/siteContent/{docId}": {
+      "schema": { "$ref": "#/entities/SiteContent" },
+      "description": "Storefront configuration document readable publicly and editable by admins."
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/Inquiry" },
+      "description": "Customer support inquiries isolated to the submitting user and admins."
+    },
+    "/aiConversations/{sessionId}": {
+      "schema": { "$ref": "#/entities/AiConversation" },
+      "description": "Authenticated AYAN AI conversation logs isolated to owner and admins."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminGrant" },
+      "description": "Authorized administrator directory."
+    }
+  }
+}
