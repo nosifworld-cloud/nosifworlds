@@ -19,24 +19,37 @@ export type ElectronicsCategory =
   | 'Gadgets';
 
 export type ProductCategory = FashionCategory | ElectronicsCategory;
+export type ProductStatus = 'active' | 'inactive' | 'draft';
 
 export interface Product {
   id: string;
   sku: string;
   name: string;
+  brand?: string;
   division: Division;
   category: ProductCategory | string;
+  subcategory?: string;
   priceBdt: number;
   compareAtBdt?: number;
   description: string;
   imageUrl: string;
+  galleryUrls?: string[];
   sizes: string[];
   colors: string[];
   specs?: string[];
+  tags?: string[];
   stock: number;
   featured: boolean;
   isNewArrival: boolean;
   isBestSeller: boolean;
+  status?: ProductStatus;
+  // SEO Fields
+  seoTitle?: string;
+  metaDescription?: string;
+  focusKeyword?: string;
+  slug?: string;
+  imageAlt?: string;
+  ogImageUrl?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -54,8 +67,16 @@ export interface CartItem {
 }
 
 export type PaymentMethod = 'bKash' | 'Nagad' | 'SSLCommerz' | 'COD';
-export type PaymentStatus = 'pending_gateway' | 'cod_pending' | 'verified' | 'failed';
-export type FulfillmentStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export type PaymentStatus = 'pending_gateway' | 'cod_pending' | 'verified' | 'failed' | 'refunded';
+export type FulfillmentStatus =
+  | 'new'
+  | 'pending'
+  | 'confirmed'
+  | 'processing'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled';
+export type RefundStatus = 'none' | 'requested' | 'refunded';
 
 export interface Order {
   id: string;
@@ -67,15 +88,31 @@ export interface Order {
   shippingAddress: string;
   city: string;
   postalCode?: string;
+  specialInstructions?: string;
   items: CartItem[];
   subtotalBdt: number;
   shippingBdt: number;
+  discountBdt?: number;
   totalBdt: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
+  transactionId?: string;
+  refundStatus?: RefundStatus;
   fulfillmentStatus: FulfillmentStatus;
+  stockDeducted?: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CategoryItem {
+  id: string;
+  name: string;
+  division: Division;
+  description?: string;
+  subcategories?: string[];
+  imageUrl?: string;
+  isVisible?: boolean;
+  updatedAt?: string;
 }
 
 export interface UserProfile {
@@ -151,6 +188,44 @@ export interface AiConversationLog {
   updatedAt: string;
 }
 
+export interface StockHistoryEntry {
+  id: string;
+  productId: string;
+  productName: string;
+  sku: string;
+  change: number;
+  previousStock: number;
+  newStock: number;
+  reason: string;
+  orderId?: string;
+  orderNumber?: string;
+  actorEmail: string;
+  createdAt: string;
+}
+
+export interface NewsletterSubscriber {
+  id: string;
+  email: string;
+  source: string;
+  createdAt: string;
+}
+
+export interface StoreSettings {
+  id: string;
+  autoDeductStockOnConfirm: boolean;
+  autoRestoreStockOnCancel: boolean;
+  lowStockThreshold: number;
+  alertSoundEnabled: boolean;
+  codEnabled: boolean;
+  bkashEnabled: boolean;
+  nagadEnabled: boolean;
+  sslcommerzEnabled: boolean;
+  dhakaShippingBdt: number;
+  outsideDhakaShippingBdt: number;
+  freeShippingThresholdBdt: number;
+  updatedAt?: string;
+}
+
 export type AppRoute =
   | { page: 'home' }
   | { page: 'about' }
@@ -158,6 +233,7 @@ export type AppRoute =
   | { page: 'electronics'; category?: string }
   | { page: 'shop'; query?: string; division?: Division | 'all' }
   | { page: 'product'; productId: string }
+  | { page: 'wishlist' }
   | { page: 'cart' }
   | { page: 'checkout' }
   | { page: 'account' }
@@ -167,4 +243,5 @@ export type AppRoute =
   | { page: 'contact' }
   | { page: 'privacy' }
   | { page: 'terms' }
-  | { page: 'admin' };
+  | { page: 'admin' }
+  | { page: 'admin-login' };

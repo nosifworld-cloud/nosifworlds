@@ -4,7 +4,7 @@ import { useStore } from '../context/StoreContext';
 import { BrandCrest } from './BrandLogo';
 
 export function Footer() {
-  const { navigate, siteContent, isAdmin } = useStore();
+  const { navigate, siteContent, isAdmin, subscribeNewsletter } = useStore();
   const [email, setEmail] = useState('');
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -15,14 +15,8 @@ export function Footer() {
     setSubmitting(true);
     setStatusMsg(null);
     try {
-      const resp = await fetch('/api/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
-      });
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || 'Subscription failed.');
-      setStatusMsg(data.message);
+      await subscribeNewsletter(email.trim(), 'footer');
+      setStatusMsg('Subscribed to NOSIF WORLDS private dispatch.');
       setEmail('');
     } catch (err) {
       setStatusMsg(err instanceof Error ? err.message : 'Unable to subscribe right now.');

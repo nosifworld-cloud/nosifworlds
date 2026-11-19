@@ -8,19 +8,30 @@
         "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
         "sku": { "type": "string", "maxLength": 48 },
         "name": { "type": "string", "minLength": 2, "maxLength": 140 },
+        "brand": { "type": "string", "maxLength": 80 },
         "division": { "type": "string", "enum": ["fashion", "electronics"] },
         "category": { "type": "string", "minLength": 2, "maxLength": 64 },
+        "subcategory": { "type": "string", "maxLength": 64 },
         "priceBdt": { "type": "number" },
         "compareAtBdt": { "type": "number" },
         "description": { "type": "string", "minLength": 10, "maxLength": 3000 },
         "imageUrl": { "type": "string", "minLength": 5, "maxLength": 1000 },
+        "galleryUrls": { "type": "array" },
         "sizes": { "type": "array" },
         "colors": { "type": "array" },
         "specs": { "type": "array" },
+        "tags": { "type": "array" },
         "stock": { "type": "integer" },
         "featured": { "type": "boolean" },
         "isNewArrival": { "type": "boolean" },
         "isBestSeller": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["active", "inactive", "draft"] },
+        "seoTitle": { "type": "string", "maxLength": 160 },
+        "metaDescription": { "type": "string", "maxLength": 320 },
+        "focusKeyword": { "type": "string", "maxLength": 80 },
+        "slug": { "type": "string", "maxLength": 140 },
+        "imageAlt": { "type": "string", "maxLength": 200 },
+        "ogImageUrl": { "type": "string", "maxLength": 1000 },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
@@ -84,13 +95,18 @@
         "shippingAddress": { "type": "string", "minLength": 5, "maxLength": 320 },
         "city": { "type": "string", "minLength": 2, "maxLength": 80 },
         "postalCode": { "type": "string", "maxLength": 24 },
+        "specialInstructions": { "type": "string", "maxLength": 500 },
         "items": { "type": "array" },
         "subtotalBdt": { "type": "number" },
         "shippingBdt": { "type": "number" },
+        "discountBdt": { "type": "number" },
         "totalBdt": { "type": "number" },
         "paymentMethod": { "type": "string", "enum": ["bKash", "Nagad", "SSLCommerz", "COD"] },
-        "paymentStatus": { "type": "string", "enum": ["pending_gateway", "cod_pending", "verified", "failed"] },
-        "fulfillmentStatus": { "type": "string", "enum": ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"] },
+        "paymentStatus": { "type": "string", "enum": ["pending_gateway", "cod_pending", "verified", "failed", "refunded"] },
+        "transactionId": { "type": "string", "maxLength": 120 },
+        "refundStatus": { "type": "string", "enum": ["none", "requested", "refunded"] },
+        "fulfillmentStatus": { "type": "string", "enum": ["new", "pending", "confirmed", "processing", "shipped", "delivered", "cancelled"] },
+        "stockDeducted": { "type": "boolean" },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
@@ -227,12 +243,110 @@
         "grantedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "email", "grantedAt"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Managed Fashion or Electronics storefront category.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 2, "maxLength": 64 },
+        "division": { "type": "string", "enum": ["fashion", "electronics"] },
+        "description": { "type": "string", "maxLength": 300 },
+        "subcategories": { "type": "array" },
+        "imageUrl": { "type": "string", "maxLength": 1000 },
+        "isVisible": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "division", "updatedAt"]
+    },
+    "StockHistoryEntry": {
+      "title": "StockHistoryEntry",
+      "description": "Immutable inventory ledger tracking automatic order deductions, restorations, and manual stock updates.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "productId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "productName": { "type": "string", "maxLength": 140 },
+        "sku": { "type": "string", "maxLength": 48 },
+        "change": { "type": "integer" },
+        "previousStock": { "type": "integer" },
+        "newStock": { "type": "integer" },
+        "reason": { "type": "string", "maxLength": 160 },
+        "orderId": { "type": "string", "maxLength": 128 },
+        "orderNumber": { "type": "string", "maxLength": 48 },
+        "actorEmail": { "type": "string", "maxLength": 200 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "id",
+        "productId",
+        "productName",
+        "sku",
+        "change",
+        "previousStock",
+        "newStock",
+        "reason",
+        "actorEmail",
+        "createdAt"
+      ]
+    },
+    "NewsletterSubscriber": {
+      "title": "NewsletterSubscriber",
+      "description": "Storefront footer newsletter dispatch subscriber.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "format": "email", "maxLength": 200 },
+        "source": { "type": "string", "maxLength": 48 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "email", "source", "createdAt"]
+    },
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "Storewide automation rules, BDT shipping config, and gateway readiness toggles.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "autoDeductStockOnConfirm": { "type": "boolean" },
+        "autoRestoreStockOnCancel": { "type": "boolean" },
+        "lowStockThreshold": { "type": "integer" },
+        "alertSoundEnabled": { "type": "boolean" },
+        "codEnabled": { "type": "boolean" },
+        "bkashEnabled": { "type": "boolean" },
+        "nagadEnabled": { "type": "boolean" },
+        "sslcommerzEnabled": { "type": "boolean" },
+        "dhakaShippingBdt": { "type": "number" },
+        "outsideDhakaShippingBdt": { "type": "number" },
+        "freeShippingThresholdBdt": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "id",
+        "autoDeductStockOnConfirm",
+        "autoRestoreStockOnCancel",
+        "lowStockThreshold",
+        "alertSoundEnabled",
+        "codEnabled",
+        "bkashEnabled",
+        "nagadEnabled",
+        "sslcommerzEnabled",
+        "dhakaShippingBdt",
+        "outsideDhakaShippingBdt",
+        "freeShippingThresholdBdt",
+        "updatedAt"
+      ]
     }
   },
   "firestore": {
     "/products/{productId}": {
       "schema": { "$ref": "#/entities/Product" },
       "description": "Public storefront catalog items managed solely by authorized administrators."
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Public Fashion & Electronics category definitions managed by administrators."
     },
     "/users/{userId}": {
       "schema": { "$ref": "#/entities/UserProfile" },
@@ -269,6 +383,18 @@
     "/admins/{adminId}": {
       "schema": { "$ref": "#/entities/AdminGrant" },
       "description": "Authorized administrator directory."
+    },
+    "/stockHistory/{entryId}": {
+      "schema": { "$ref": "#/entities/StockHistoryEntry" },
+      "description": "Admin-only stock movement audit log."
+    },
+    "/newsletter/{subscriberId}": {
+      "schema": { "$ref": "#/entities/NewsletterSubscriber" },
+      "description": "Newsletter dispatch subscribers; anyone can subscribe, only admins can read or manage."
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/StoreSettings" },
+      "description": "Store automation, shipping rates, and payment readiness settings."
     }
   }
 }

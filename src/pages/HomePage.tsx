@@ -7,7 +7,7 @@ import { LuxuryImage } from '../components/BrandLogo';
 import { ProductCard } from '../components/ProductCard';
 
 export function HomePage() {
-  const { products, reviews, siteContent, navigate } = useStore();
+  const { products, reviews, siteContent, navigate, openSearchModal } = useStore();
   const [heroSearch, setHeroSearch] = useState('');
   const [collectionTab, setCollectionTab] = useState<'featured' | 'new' | 'bestseller'>('featured');
 
@@ -19,7 +19,7 @@ export function HomePage() {
 
   const handleHeroSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate({ page: 'shop', query: heroSearch.trim() || undefined, division: 'all' });
+    openSearchModal(heroSearch.trim());
   };
 
   return (

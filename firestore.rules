@@ -49,28 +49,41 @@ service cloud.firestore {
           'featured', 'isNewArrival', 'isBestSeller', 'createdAt', 'updatedAt'
         ])
         && data.keys().hasOnly([
-          'id', 'sku', 'name', 'division', 'category', 'priceBdt', 'compareAtBdt',
-          'description', 'imageUrl', 'sizes', 'colors', 'specs', 'stock',
-          'featured', 'isNewArrival', 'isBestSeller', 'createdAt', 'updatedAt'
+          'id', 'sku', 'name', 'brand', 'division', 'category', 'subcategory',
+          'priceBdt', 'compareAtBdt', 'description', 'imageUrl', 'galleryUrls',
+          'sizes', 'colors', 'specs', 'tags', 'stock', 'featured',
+          'isNewArrival', 'isBestSeller', 'status', 'seoTitle', 'metaDescription',
+          'focusKeyword', 'slug', 'imageAlt', 'ogImageUrl', 'createdAt', 'updatedAt'
         ])
         && isValidId(data.id)
         && data.sku is string && data.sku.size() >= 1 && data.sku.size() <= 48
         && data.name is string && data.name.size() >= 2 && data.name.size() <= 140
+        && (!('brand' in data) || (data.brand is string && data.brand.size() <= 80))
         && data.division in ['fashion', 'electronics']
         && data.category is string && data.category.size() >= 2 && data.category.size() <= 64
+        && (!('subcategory' in data) || (data.subcategory is string && data.subcategory.size() <= 64))
         && data.priceBdt is number && data.priceBdt >= 0 && data.priceBdt <= 50000000
         && (!('compareAtBdt' in data) || (data.compareAtBdt is number && data.compareAtBdt >= 0 && data.compareAtBdt <= 50000000))
         && data.description is string && data.description.size() >= 10 && data.description.size() <= 3000
         && data.imageUrl is string && data.imageUrl.size() >= 5 && data.imageUrl.size() <= 1000
+        && (!('galleryUrls' in data) || (data.galleryUrls is list && data.galleryUrls.size() <= 12 && (data.galleryUrls.size() == 0 || (data.galleryUrls[0] is string && data.galleryUrls[0].size() <= 1000))))
         && data.sizes is list && data.sizes.size() <= 16
         && (data.sizes.size() == 0 || (data.sizes[0] is string && data.sizes[0].size() <= 32))
         && data.colors is list && data.colors.size() <= 16
         && (data.colors.size() == 0 || (data.colors[0] is string && data.colors[0].size() <= 40))
-        && (!('specs' in data) || (data.specs is list && data.specs.size() <= 20))
+        && (!('specs' in data) || (data.specs is list && data.specs.size() <= 20 && (data.specs.size() == 0 || (data.specs[0] is string && data.specs[0].size() <= 200))))
+        && (!('tags' in data) || (data.tags is list && data.tags.size() <= 20 && (data.tags.size() == 0 || (data.tags[0] is string && data.tags[0].size() <= 48))))
         && data.stock is int && data.stock >= 0 && data.stock <= 100000
         && data.featured is bool
         && data.isNewArrival is bool
         && data.isBestSeller is bool
+        && (!('status' in data) || data.status in ['active', 'inactive', 'draft'])
+        && (!('seoTitle' in data) || (data.seoTitle is string && data.seoTitle.size() <= 160))
+        && (!('metaDescription' in data) || (data.metaDescription is string && data.metaDescription.size() <= 320))
+        && (!('focusKeyword' in data) || (data.focusKeyword is string && data.focusKeyword.size() <= 80))
+        && (!('slug' in data) || (data.slug is string && data.slug.size() <= 140))
+        && (!('imageAlt' in data) || (data.imageAlt is string && data.imageAlt.size() <= 200))
+        && (!('ogImageUrl' in data) || (data.ogImageUrl is string && data.ogImageUrl.size() <= 1000))
         && data.createdAt is timestamp
         && data.updatedAt is timestamp;
     }
@@ -108,9 +121,10 @@ service cloud.firestore {
         ])
         && data.keys().hasOnly([
           'orderNumber', 'userId', 'customerName', 'customerEmail', 'customerPhone',
-          'shippingAddress', 'city', 'postalCode', 'items', 'subtotalBdt', 'shippingBdt',
-          'totalBdt', 'paymentMethod', 'paymentStatus', 'fulfillmentStatus',
-          'createdAt', 'updatedAt'
+          'shippingAddress', 'city', 'postalCode', 'specialInstructions', 'items',
+          'subtotalBdt', 'shippingBdt', 'discountBdt', 'totalBdt',
+          'paymentMethod', 'paymentStatus', 'transactionId', 'refundStatus',
+          'fulfillmentStatus', 'stockDeducted', 'createdAt', 'updatedAt'
         ])
         && data.orderNumber is string && data.orderNumber.size() >= 4 && data.orderNumber.size() <= 48
         && isValidId(data.userId)
@@ -120,14 +134,19 @@ service cloud.firestore {
         && data.shippingAddress is string && data.shippingAddress.size() >= 5 && data.shippingAddress.size() <= 320
         && data.city is string && data.city.size() >= 2 && data.city.size() <= 80
         && (!('postalCode' in data) || (data.postalCode is string && data.postalCode.size() <= 24))
+        && (!('specialInstructions' in data) || (data.specialInstructions is string && data.specialInstructions.size() <= 500))
         && data.items is list && data.items.size() >= 1 && data.items.size() <= 40
         && data.items[0] is map
         && data.subtotalBdt is number && data.subtotalBdt >= 0 && data.subtotalBdt <= 100000000
         && data.shippingBdt is number && data.shippingBdt >= 0 && data.shippingBdt <= 100000
+        && (!('discountBdt' in data) || (data.discountBdt is number && data.discountBdt >= 0 && data.discountBdt <= 100000000))
         && data.totalBdt is number && data.totalBdt >= 0 && data.totalBdt <= 100100000
         && data.paymentMethod in ['bKash', 'Nagad', 'SSLCommerz', 'COD']
-        && data.paymentStatus in ['pending_gateway', 'cod_pending', 'verified', 'failed']
-        && data.fulfillmentStatus in ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']
+        && data.paymentStatus in ['pending_gateway', 'cod_pending', 'verified', 'failed', 'refunded']
+        && (!('transactionId' in data) || (data.transactionId is string && data.transactionId.size() <= 120))
+        && (!('refundStatus' in data) || data.refundStatus in ['none', 'requested', 'refunded'])
+        && data.fulfillmentStatus in ['new', 'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']
+        && (!('stockDeducted' in data) || data.stockDeducted is bool)
         && data.createdAt is timestamp
         && data.updatedAt is timestamp;
     }
@@ -223,6 +242,82 @@ service cloud.firestore {
         && data.grantedAt is timestamp;
     }
 
+    function isValidCategory(data) {
+      return data.keys().hasAll(['id', 'name', 'division', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'name', 'division', 'description', 'subcategories', 'imageUrl', 'isVisible', 'updatedAt'])
+        && isValidId(data.id)
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 64
+        && data.division in ['fashion', 'electronics']
+        && (!('description' in data) || (data.description is string && data.description.size() <= 300))
+        && (!('subcategories' in data) || (data.subcategories is list && data.subcategories.size() <= 25 && (data.subcategories.size() == 0 || (data.subcategories[0] is string && data.subcategories[0].size() <= 64))))
+        && (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 1000))
+        && (!('isVisible' in data) || data.isVisible is bool)
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidStockHistory(data) {
+      return data.keys().hasAll([
+          'id', 'productId', 'productName', 'sku', 'change',
+          'previousStock', 'newStock', 'reason', 'actorEmail', 'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'id', 'productId', 'productName', 'sku', 'change',
+          'previousStock', 'newStock', 'reason', 'orderId', 'orderNumber',
+          'actorEmail', 'createdAt'
+        ])
+        && isValidId(data.id)
+        && isValidId(data.productId)
+        && data.productName is string && data.productName.size() >= 1 && data.productName.size() <= 140
+        && data.sku is string && data.sku.size() >= 1 && data.sku.size() <= 48
+        && data.change is int && data.change >= -100000 && data.change <= 100000
+        && data.previousStock is int && data.previousStock >= 0 && data.previousStock <= 100000
+        && data.newStock is int && data.newStock >= 0 && data.newStock <= 100000
+        && data.reason is string && data.reason.size() >= 2 && data.reason.size() <= 160
+        && (!('orderId' in data) || (data.orderId is string && data.orderId.size() <= 128))
+        && (!('orderNumber' in data) || (data.orderNumber is string && data.orderNumber.size() <= 48))
+        && data.actorEmail is string && data.actorEmail.size() >= 3 && data.actorEmail.size() <= 200
+        && data.createdAt is timestamp;
+    }
+
+    function isValidNewsletterSubscriber(data) {
+      return data.keys().hasAll(['id', 'email', 'source', 'createdAt'])
+        && data.keys().hasOnly(['id', 'email', 'source', 'createdAt'])
+        && isValidId(data.id)
+        && data.email is string && data.email.size() >= 5 && data.email.size() <= 200 && data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && data.source is string && data.source.size() >= 1 && data.source.size() <= 48
+        && data.createdAt is timestamp;
+    }
+
+    function isValidStoreSettings(data) {
+      return data.keys().hasAll([
+          'id', 'autoDeductStockOnConfirm', 'autoRestoreStockOnCancel',
+          'lowStockThreshold', 'alertSoundEnabled', 'codEnabled',
+          'bkashEnabled', 'nagadEnabled', 'sslcommerzEnabled',
+          'dhakaShippingBdt', 'outsideDhakaShippingBdt', 'freeShippingThresholdBdt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id', 'autoDeductStockOnConfirm', 'autoRestoreStockOnCancel',
+          'lowStockThreshold', 'alertSoundEnabled', 'codEnabled',
+          'bkashEnabled', 'nagadEnabled', 'sslcommerzEnabled',
+          'dhakaShippingBdt', 'outsideDhakaShippingBdt', 'freeShippingThresholdBdt',
+          'updatedAt'
+        ])
+        && isValidId(data.id)
+        && data.autoDeductStockOnConfirm is bool
+        && data.autoRestoreStockOnCancel is bool
+        && data.lowStockThreshold is int && data.lowStockThreshold >= 0 && data.lowStockThreshold <= 500
+        && data.alertSoundEnabled is bool
+        && data.codEnabled is bool
+        && data.bkashEnabled is bool
+        && data.nagadEnabled is bool
+        && data.sslcommerzEnabled is bool
+        && data.dhakaShippingBdt is number && data.dhakaShippingBdt >= 0 && data.dhakaShippingBdt <= 50000
+        && data.outsideDhakaShippingBdt is number && data.outsideDhakaShippingBdt >= 0 && data.outsideDhakaShippingBdt <= 50000
+        && data.freeShippingThresholdBdt is number && data.freeShippingThresholdBdt >= 0 && data.freeShippingThresholdBdt <= 5000000
+        && data.updatedAt is timestamp;
+    }
+
     // --- Collection Rules ---
 
     // Storefront Catalog (Public Read, Admin Write)
@@ -242,11 +337,25 @@ service cloud.firestore {
         && incoming().createdAt == existing().createdAt
         && incoming().updatedAt == request.time
         && incoming().diff(existing()).affectedKeys().hasOnly([
-          'sku', 'name', 'division', 'category', 'priceBdt', 'compareAtBdt',
-          'description', 'imageUrl', 'sizes', 'colors', 'specs', 'stock',
-          'featured', 'isNewArrival', 'isBestSeller', 'updatedAt'
+          'sku', 'name', 'brand', 'division', 'category', 'subcategory',
+          'priceBdt', 'compareAtBdt', 'description', 'imageUrl', 'galleryUrls',
+          'sizes', 'colors', 'specs', 'tags', 'stock', 'featured',
+          'isNewArrival', 'isBestSeller', 'status', 'seoTitle', 'metaDescription',
+          'focusKeyword', 'slug', 'imageAlt', 'ogImageUrl', 'updatedAt'
         ]);
       allow delete: if isAdmin() && isValidId(productId);
+    }
+
+    // Storefront Categories (Public Read, Admin Write)
+    match /categories/{categoryId} {
+      allow get: if isValidId(categoryId);
+      allow list: if true;
+      allow create, update: if isAdmin()
+        && isValidId(categoryId)
+        && isValidCategory(incoming())
+        && incoming().id == categoryId
+        && incoming().updatedAt == request.time;
+      allow delete: if isAdmin() && isValidId(categoryId);
     }
 
     // Private Customer PII Profiles
@@ -297,7 +406,7 @@ service cloud.firestore {
         && isValidId(orderId)
         && isValidOrder(incoming())
         && incoming().userId == request.auth.uid
-        && incoming().fulfillmentStatus == 'pending'
+        && incoming().fulfillmentStatus in ['new', 'pending']
         && incoming().paymentStatus in ['pending_gateway', 'cod_pending']
         && incoming().createdAt == request.time
         && incoming().updatedAt == request.time;
@@ -308,7 +417,10 @@ service cloud.firestore {
         && incoming().orderNumber == existing().orderNumber
         && incoming().createdAt == existing().createdAt
         && incoming().updatedAt == request.time
-        && incoming().diff(existing()).affectedKeys().hasOnly(['paymentStatus', 'fulfillmentStatus', 'updatedAt']);
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'paymentStatus', 'fulfillmentStatus', 'transactionId', 'refundStatus',
+          'discountBdt', 'totalBdt', 'stockDeducted', 'updatedAt'
+        ]);
       allow delete: if isAdmin() && isValidId(orderId);
     }
 
@@ -411,6 +523,41 @@ service cloud.firestore {
         && isValidAdminGrant(incoming(), adminId)
         && incoming().grantedAt == request.time;
       allow delete: if isAdmin() && isValidId(adminId);
+    }
+
+    // Admin Stock History Audit Log
+    match /stockHistory/{entryId} {
+      allow get: if isValidId(entryId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+        && isValidId(entryId)
+        && isValidStockHistory(incoming())
+        && incoming().id == entryId
+        && incoming().createdAt == request.time;
+      allow delete: if isAdmin() && isValidId(entryId);
+    }
+
+    // Newsletter Subscribers (Public Subscribe, Admin View/Remove)
+    match /newsletter/{subscriberId} {
+      allow get: if isValidId(subscriberId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isValidId(subscriberId)
+        && isValidNewsletterSubscriber(incoming())
+        && incoming().id == subscriberId
+        && incoming().createdAt == request.time;
+      allow delete: if isAdmin() && isValidId(subscriberId);
+    }
+
+    // Store Automation, Shipping & Payment Config (Public Read, Admin Write)
+    match /settings/{settingId} {
+      allow get: if isValidId(settingId);
+      allow list: if true;
+      allow create, update: if isAdmin()
+        && isValidId(settingId)
+        && isValidStoreSettings(incoming())
+        && incoming().id == settingId
+        && incoming().updatedAt == request.time;
+      allow delete: if isAdmin() && isValidId(settingId);
     }
   }
 }

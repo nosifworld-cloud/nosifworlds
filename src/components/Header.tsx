@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { Menu, Search, ShoppingBag, User, X } from 'lucide-react';
+import { Heart, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { BrandCrest } from './BrandLogo';
 
 export function Header() {
-  const { route, navigate, cartCount, user, isAdmin } = useStore();
+  const {
+    route,
+    navigate,
+    cartCount,
+    wishlistIds,
+    user,
+    isAdmin,
+    openSearchModal,
+  } = useStore();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchOpen(false);
-    navigate({ page: 'shop', query: searchQuery.trim() || undefined, division: 'all' });
-  };
 
   const navLinkClass = (active: boolean) =>
     `text-sm font-medium transition-colors whitespace-nowrap shrink-0 pb-0.5 border-b ${
@@ -23,7 +23,7 @@ export function Header() {
     }`;
 
   return (
-    <header className="sticky top-0 z-40 bg-[#FAFAF9]/95 backdrop-blur-md border-b border-zinc-200">
+    <header className="sticky top-0 z-40 bg-[#FAFAF9]/95 backdrop-blur-md border-b border-zinc-200 print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
         {/* Zone 1: Single-line Brand Title */}
         <a
@@ -95,14 +95,30 @@ export function Header() {
         </nav>
 
         {/* Zone 3: Single Primary Action & Utility Cluster */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
-            onClick={() => setSearchOpen((prev) => !prev)}
-            aria-label="Search catalog"
+            onClick={() => openSearchModal()}
+            aria-label="Open catalog search and filters"
+            title="Search & Filter Catalog (Ctrl+K)"
             className="w-10 h-10 flex items-center justify-center text-zinc-700 hover:text-[#09090B] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A252]"
           >
             <Search className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate({ page: 'wishlist' })}
+            aria-label={`Wishlist (${wishlistIds.length})`}
+            className="hidden sm:flex relative w-10 h-10 items-center justify-center text-zinc-700 hover:text-[#09090B] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A252]"
+          >
+            <Heart
+              className={`w-4 h-4 ${
+                route.page === 'wishlist' || wishlistIds.length > 0 ? 'text-[#9E7B31]' : ''
+              }`}
+            />
+            {wishlistIds.length > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#C8A252] rounded-full" />
+            )}
           </button>
           <button
             type="button"
@@ -131,32 +147,6 @@ export function Header() {
         </div>
       </div>
 
-      {/* Expandable Search Bar */}
-      {searchOpen && (
-        <div className="border-t border-zinc-200 bg-white">
-          <form
-            onSubmit={handleSearchSubmit}
-            className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3"
-          >
-            <Search className="w-4 h-4 text-zinc-400 shrink-0" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search blazers, watches, smartphones, ANC headphones..."
-              autoFocus
-              className="flex-1 text-sm bg-transparent text-[#09090B] placeholder:text-zinc-400 focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="px-4 py-1.5 bg-[#09090B] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#1C1C1F] transition-colors whitespace-nowrap shrink-0"
-            >
-              Search
-            </button>
-          </form>
-        </div>
-      )}
-
       {/* Mobile Navigation Drawer */}
       {mobileOpen && (
         <div className="lg:hidden border-t border-zinc-200 bg-white px-4 py-5 space-y-4">
@@ -166,8 +156,9 @@ export function Header() {
               { label: 'Fashion Store', target: { page: 'fashion' } as const },
               { label: 'Electronics Store', target: { page: 'electronics' } as const },
               { label: 'All Products', target: { page: 'shop', division: 'all' } as const },
-              { label: 'About Us', target: { page: 'about' } as const },
+              { label: `Wishlist (${wishlistIds.length})`, target: { page: 'wishlist' } as const },
               { label: 'Journal', target: { page: 'journal' } as const },
+              { label: 'About Us', target: { page: 'about' } as const },
               { label: 'Customer Reviews', target: { page: 'reviews' } as const },
               { label: 'Contact Us', target: { page: 'contact' } as const },
               { label: user ? 'My Account' : 'Sign In', target: { page: 'account' } as const },

@@ -18,7 +18,7 @@ export function CatalogPage({
   initialQuery = '',
   initialDivision = 'all',
 }: CatalogPageProps) {
-  const { products } = useStore();
+  const { products, visibleCategories: managedCategories } = useStore();
   const [selectedDivision, setSelectedDivision] = useState<Division | 'all'>(
     mode === 'all' ? initialDivision : mode,
   );
@@ -30,13 +30,19 @@ export function CatalogPage({
   const activeDivision = mode === 'all' ? selectedDivision : mode;
 
   const categories = useMemo(() => {
-    if (activeDivision === 'fashion') return ['All', ...FASHION_CATEGORIES];
-    if (activeDivision === 'electronics') return ['All', ...ELECTRONICS_CATEGORIES];
-    return [
-      'All',
-      ...Array.from(new Set([...FASHION_CATEGORIES, ...ELECTRONICS_CATEGORIES])),
-    ];
-  }, [activeDivision]);
+    const dynamicFashion = managedCategories
+      .filter((c) => c.division === 'fashion')
+      .map((c) => c.name);
+    const dynamicElectronics = managedCategories
+      .filter((c) => c.division === 'electronics')
+      .map((c) => c.name);
+    const fList = dynamicFashion.length > 0 ? dynamicFashion : [...FASHION_CATEGORIES];
+    const eList = dynamicElectronics.length > 0 ? dynamicElectronics : [...ELECTRONICS_CATEGORIES];
+
+    if (activeDivision === 'fashion') return ['All', ...Array.from(new Set(fList))];
+    if (activeDivision === 'electronics') return ['All', ...Array.from(new Set(eList))];
+    return ['All', ...Array.from(new Set([...fList, ...eList]))];
+  }, [activeDivision, managedCategories]);
 
   const filteredProducts = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();

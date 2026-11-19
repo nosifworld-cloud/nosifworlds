@@ -21,6 +21,7 @@ export function ProductDetailPage({ productId }: { productId: string }) {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
+  const [activeImage, setActiveImage] = useState<string>('');
 
   const [reviewTitle, setReviewTitle] = useState('');
   const [reviewComment, setReviewComment] = useState('');
@@ -99,13 +100,33 @@ export function ProductDetailPage({ productId }: { productId: string }) {
       {/* Main Contiguous PDP Split */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
         {/* Sticky Gallery Left */}
-        <div className="lg:col-span-7 lg:sticky lg:top-24 bg-[#141416] border border-zinc-200 aspect-[4/3] overflow-hidden">
-          <LuxuryImage
-            src={product.imageUrl}
-            alt={product.name}
-            fallbackTitle={product.name}
-            className="w-full h-full object-cover"
-          />
+        <div className="lg:col-span-7 lg:sticky lg:top-24 space-y-3">
+          <div className="bg-[#141416] border border-zinc-200 aspect-[4/3] overflow-hidden">
+            <LuxuryImage
+              src={activeImage || product.imageUrl}
+              alt={product.imageAlt || product.name}
+              fallbackTitle={product.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          {product.galleryUrls && product.galleryUrls.length > 1 && (
+            <div className="grid grid-cols-5 gap-2">
+              {product.galleryUrls.map((url, idx) => (
+                <button
+                  key={`${url}-${idx}`}
+                  type="button"
+                  onClick={() => setActiveImage(url)}
+                  className={`aspect-[4/3] border overflow-hidden ${
+                    (activeImage || product.imageUrl) === url
+                      ? 'border-[#C8A252] ring-1 ring-[#C8A252]'
+                      : 'border-zinc-200 opacity-75 hover:opacity-100'
+                  }`}
+                >
+                  <LuxuryImage src={url} alt={`${product.name} view ${idx + 1}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Purchase Module Right */}

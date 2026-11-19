@@ -6,8 +6,13 @@ import { Order, PaymentMethod } from '../types';
 import { LuxuryImage } from '../components/BrandLogo';
 
 export function CartPage() {
-  const { cart, cartSubtotalBdt, updateCartQty, removeFromCart, navigate } = useStore();
-  const estimatedShipping = cartSubtotalBdt >= 25000 ? 0 : cartSubtotalBdt > 0 ? 150 : 0;
+  const { cart, cartSubtotalBdt, storeSettings, updateCartQty, removeFromCart, navigate } = useStore();
+  const estimatedShipping =
+    cartSubtotalBdt >= storeSettings.freeShippingThresholdBdt
+      ? 0
+      : cartSubtotalBdt > 0
+        ? storeSettings.dhakaShippingBdt
+        : 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 space-y-8">
@@ -173,6 +178,7 @@ export function CheckoutPage() {
   const {
     cart,
     cartSubtotalBdt,
+    storeSettings,
     user,
     userProfile,
     signInWithGoogle,
@@ -186,6 +192,7 @@ export function CheckoutPage() {
   const [city, setCity] = useState('Dhaka');
   const [shippingAddress, setShippingAddress] = useState('');
   const [postalCode, setPostalCode] = useState('');
+  const [specialInstructions, setSpecialInstructions] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('COD');
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -203,7 +210,12 @@ export function CheckoutPage() {
   }, [user, userProfile]);
 
   const isDhaka = city.trim().toLowerCase().includes('dhaka');
-  const shippingBdt = cartSubtotalBdt >= 25000 ? 0 : isDhaka ? 150 : 300;
+  const shippingBdt =
+    cartSubtotalBdt >= storeSettings.freeShippingThresholdBdt
+      ? 0
+      : isDhaka
+        ? storeSettings.dhakaShippingBdt
+        : storeSettings.outsideDhakaShippingBdt;
   const totalBdt = cartSubtotalBdt + shippingBdt;
 
   if (confirmedOrder) {
@@ -239,6 +251,12 @@ export function CheckoutPage() {
                 {formatBdt(confirmedOrder.totalBdt)}
               </span>
             </div>
+            {confirmedOrder.specialInstructions && (
+              <div className="flex justify-between gap-4 pt-1 border-t border-zinc-200/70">
+                <span className="text-zinc-600 shrink-0">Special Instructions</span>
+                <span className="text-right text-zinc-800">{confirmedOrder.specialInstructions}</span>
+              </div>
+            )}
           </div>
 
           {confirmedOrder.paymentStatus === 'pending_gateway' && (
@@ -280,6 +298,7 @@ export function CheckoutPage() {
         shippingAddress,
         city,
         postalCode,
+        specialInstructions,
         paymentMethod,
       });
       setConfirmedOrder(order);
@@ -418,6 +437,19 @@ export function CheckoutPage() {
                   className="w-full border border-zinc-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#C8A252]"
                 />
               </div>
+              <div className="sm:col-span-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-zinc-600 block mb-1.5">
+                  Special Instructions (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  maxLength={500}
+                  placeholder="Gift wrapping, preferred courier call time, tailoring measurement note..."
+                  value={specialInstructions}
+                  onChange={(e) => setSpecialInstructions(e.target.value)}
+                  className="w-full border border-zinc-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#C8A252]"
+                />
+              </div>
             </div>
 
             <div className="pt-4 border-t border-zinc-100 space-y-4">
@@ -430,40 +462,46 @@ export function CheckoutPage() {
                   [
                     {
                       id: 'COD' as const,
+                      enabled: storeSettings.codEnabled,
                       title: 'Cash on Delivery (COD)',
                       desc: 'Pay in BDT upon insured courier arrival.',
                     },
                     {
                       id: 'bKash' as const,
+                      enabled: storeSettings.bkashEnabled,
                       title: 'bKash (Gateway-Ready)',
                       desc: 'Requires merchant bKash API credentials to charge.',
                     },
                     {
                       id: 'Nagad' as const,
+                      enabled: storeSettings.nagadEnabled,
                       title: 'Nagad (Gateway-Ready)',
                       desc: 'Requires merchant Nagad API credentials to charge.',
                     },
                     {
                       id: 'SSLCommerz' as const,
+                      enabled: storeSettings.sslcommerzEnabled,
                       title: 'SSLCommerz (Cards / MFS)',
                       desc: 'Requires SSLCommerz store credentials to charge.',
                     },
                   ] as const
-                ).map((method) => (
-                  <button
-                    key={method.id}
-                    type="button"
-                    onClick={() => setPaymentMethod(method.id)}
-                    className={`p-4 border text-left transition-colors ${
-                      paymentMethod === method.id
-                        ? 'border-[#09090B] bg-zinc-50'
-                        : 'border-zinc-200 hover:border-zinc-400'
-                    }`}
-                  >
-                    <p className="text-sm font-semibold text-[#09090B]">{method.title}</p>
-                    <p className="text-xs text-zinc-500 mt-1">{method.desc}</p>
-                  </button>
-                ))}
+                )
+                  .filter((m) => m.enabled)
+                  .map((method) => (
+                    <button
+                      key={method.id}
+                      type="button"
+                      onClick={() => setPaymentMethod(method.id)}
+                      className={`p-4 border text-left transition-colors ${
+                        paymentMethod === method.id
+                          ? 'border-[#09090B] bg-zinc-50'
+                          : 'border-zinc-200 hover:border-zinc-400'
+                      }`}
+                    >
+                      <p className="text-sm font-semibold text-[#09090B]">{method.title}</p>
+                      <p className="text-xs text-zinc-500 mt-1">{method.desc}</p>
+                    </button>
+                  ))}
               </div>
 
               {paymentMethod !== 'COD' && (

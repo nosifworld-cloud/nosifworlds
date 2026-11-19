@@ -12,7 +12,10 @@ const PORT = Number(process.env.PORT || 3000);
 const IS_PROD = process.env.NODE_ENV === 'production';
 
 const app = express();
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '6mb' }));
+const UPLOADS_DIR = path.resolve(__dirname, 'public', 'uploads');
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+app.use('/uploads', express.static(UPLOADS_DIR));
 
 function getGeminiClient(): GoogleGenAI | null {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -95,6 +98,31 @@ app.post('/api/contact/guest', (req, res) => {
     ticketId,
     message: 'Your inquiry has been logged for our concierge desk.',
   });
+});
+
+app.post('/api/admin/upload-image', (req, res) => {
+  const dataUrl = typeof req.body?.dataUrl === 'string' ? req.body.dataUrl : '';
+  const rawName = typeof req.body?.filename === 'string' ? req.body.filename : 'asset';
+  const match = dataUrl.match(/^data:image\/(png|jpeg|jpg|webp);base64,([A-Za-z0-9+/=]+)$/);
+  if (!match) {
+    res.status(400).json({ error: 'Only PNG, JPG, and WEBP image uploads are supported.' });
+    return;
+  }
+  const ext = match[1] === 'jpeg' ? 'jpg' : match[1];
+  const buffer = Buffer.from(match[2], 'base64');
+  if (buffer.length > 4 * 1024 * 1024) {
+    res.status(400).json({ error: 'Image must be smaller than 4 MB.' });
+    return;
+  }
+  const safeBase = rawName
+    .replace(/\.[^.]+$/, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40) || 'product';
+  const filename = `${safeBase}-${Date.now()}.${ext}`;
+  fs.writeFileSync(path.join(UPLOADS_DIR, filename), buffer);
+  res.json({ ok: true, url: `/uploads/${filename}` });
 });
 
 app.post('/api/ayan/chat', async (req, res) => {

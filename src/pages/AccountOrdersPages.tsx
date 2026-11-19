@@ -208,9 +208,18 @@ export function AccountPage() {
 
       {/* Wishlist */}
       <section className="space-y-6">
-        <h2 className="font-display text-3xl font-semibold text-[#09090B]">
-          Saved Wishlist ({wishlistProducts.length})
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h2 className="font-display text-3xl font-semibold text-[#09090B]">
+            Saved Wishlist ({wishlistProducts.length})
+          </h2>
+          <button
+            type="button"
+            onClick={() => navigate({ page: 'wishlist' })}
+            className="text-xs font-semibold uppercase tracking-wider text-[#9E7B31] hover:underline"
+          >
+            Open Dedicated Wishlist View
+          </button>
+        </div>
         {wishlistProducts.length === 0 ? (
           <p className="text-sm text-zinc-500">
             Tap the heart icon on any piece across the catalog to curate your private wishlist.
@@ -307,6 +316,13 @@ export function OrdersPage() {
                   </div>
                 ))}
               </div>
+
+              {order.specialInstructions && (
+                <div className="pt-3 border-t border-zinc-100 text-xs text-zinc-600">
+                  <span className="font-semibold text-[#09090B]">Delivery Note:</span>{' '}
+                  {order.specialInstructions}
+                </div>
+              )}
             </div>
           ))}
         </div>
